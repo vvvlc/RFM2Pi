@@ -1,7 +1,13 @@
-//Slightly edited for RFM12Pi and emonPi opperation June 2014 by Glyn Hudson and Trystan Lea 
-//OpenEnergyMonitor.org
+//RFM12Pi V2 with RFM69CW Firmware 
+//Based on JCW RF12 Demo: https://github.com/jcw/jeelib/tree/master/examples/RF12/RF12demo
+//Edited for RFM12Pi and emonPi operation June 2014 by Glyn Hudson and Trystan Lea 
+//http://OpenEnergyMonitor.org
+//https://github.com/openenergymonitor/RFM2Pi
 
-// Changes:
+// Version V1.0 - Nov 2014
+// * 433Mhz default frequency, 15 default node ID
+
+// V0.9 June 2014
 // * 210 default network group
 // * activity LED to light on startup and each time packet is received 
 
@@ -25,7 +31,7 @@
 
 #define MAJOR_VERSION RF12_EEPROM_VERSION // bump when EEPROM layout changes
 #define MINOR_VERSION 2                   // bump on other non-trivial changes
-#define VERSION "[RF12demo.12]"           // keep in sync with the above
+#define VERSION "[RF12demo.12_V1.0]"           // keep in sync with the above
 
 #if defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny44__)
 #define TINY        1
@@ -566,7 +572,8 @@ void setup () {
         loadConfig();
     } else {
         memset(&config, 0, sizeof config);
-        config.nodeId = 0x81;       // 868 MHz, node 1
+        //config.nodeId = 0x81;       // 868 MHz, node 1
+        config.nodeId = 0x415;       // 868 MHz, node 15
         //config.group = 0xD4;        // default group 212
         config.group = 0xD2;          // RFM12Pi - default group 210
         config.frequency_offset = 1600;

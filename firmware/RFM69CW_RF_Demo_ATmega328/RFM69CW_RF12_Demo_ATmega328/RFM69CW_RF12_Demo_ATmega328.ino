@@ -572,8 +572,8 @@ void setup () {
         loadConfig();
     } else {
         memset(&config, 0, sizeof config);
-        //config.nodeId = 0x81;       // 868 MHz, node 1
-        config.nodeId = 0x415;       // 868 MHz, node 15
+        //config.nodeId = 0x82;       // 868 MHz, node 1
+        config.nodeId = 0x82; 
         //config.group = 0xD4;        // default group 212
         config.group = 0xD2;          // RFM12Pi - default group 210
         config.frequency_offset = 1600;

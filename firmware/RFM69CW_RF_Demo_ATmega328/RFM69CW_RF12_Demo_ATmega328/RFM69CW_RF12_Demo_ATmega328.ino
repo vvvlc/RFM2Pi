@@ -41,7 +41,7 @@
 #define rf12_configDump()   // disabled
 #else
 #define TINY        0
-#define SERIAL_BAUD 57600   // adjust as needed
+#define SERIAL_BAUD 38400   // max baud for 8Mhz RFM12Pi http://openenergymonitor.org/emon/node/6244/
 #define DATAFLASH   0       // set to 0 for non-JeeLinks, else 4/8/16 (Mbit)
 #define LED_PIN     9       // activity LED, comment out to disable
 #endif

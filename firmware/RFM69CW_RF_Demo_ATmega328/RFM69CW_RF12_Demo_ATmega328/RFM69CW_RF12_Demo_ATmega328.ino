@@ -638,7 +638,7 @@ void loop () {
       showByte(rf12_grp);
     }
     printOneChar(' ');
-    showByte(rf12_hdr);
+    showByte(rf12_hdr & 0x1F);
     for (byte i = 0; i < n; ++i) {
       if (!config.hex_output)
         printOneChar(' ');

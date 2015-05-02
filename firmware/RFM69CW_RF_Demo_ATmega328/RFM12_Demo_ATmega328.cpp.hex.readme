@@ -1,0 +1,2 @@
+RFM12_Demo_ATmega328.cpp.hex is the same as RFM69CW_RF12_Demo_ATmega328.cpp.hex but compiled with 
+# RF69_COMPAT 0 - for RFM12

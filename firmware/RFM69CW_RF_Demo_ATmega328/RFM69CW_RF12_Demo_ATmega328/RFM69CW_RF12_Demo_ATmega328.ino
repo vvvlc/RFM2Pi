@@ -50,6 +50,10 @@
 const char INVALID1[] PROGMEM = "\rInvalid\n";
 const char INITFAIL[] PROGMEM = "config save failed\n";
 
+#if RF69_COMPAT
+  byte trace_mode = 0;
+#endif
+
 #if TINY
 // Serial support (output only) for Tiny supported by TinyDebugSerial
 // http://www.ernstc.dk/arduino/tinycom.html
@@ -311,6 +315,10 @@ const char helpText1[] PROGMEM =
 "  ...,<nn> s - send data packet to node <nn>, no ack\n"
 "  <n> q      - set quiet mode (1 = don't report bad packets)\n"
 "  <n> x      - set reporting format (0: decimal, 1: hex, 2: hex+ascii)\n"
+#if RF69_COMPAT
+"  <nnn> y    - enable signal strength trace mode, default:0 (disabled)\n"
+"               sample interval <nnn> secs/100 (0.01s-2.5s) eg 10y=0.1s\n"
+#endif
 "  123 z      - total power down, needs a reset to start up again\n"
 "Remote control commands:\n"
 "  <hchi>,<hclo>,<addr>,<cmd> f     - FS20 command (868 MHz)\n"
@@ -542,6 +550,11 @@ static void handleInput (char c) {
         showString(PSTR("erased\n"));
       }
       break;
+#if RF69_COMPAT
+    case 'y': // turn signal strength trace mode on or off (rfm69 only)
+      trace_mode = value;
+      break;
+#endif
 
     default:
       showHelp();
@@ -616,6 +629,9 @@ void loop () {
 #else
   if (Serial.available())
     handleInput(Serial.read());
+#endif
+#if RF69_COMPAT
+  if (trace_mode == 0) {
 #endif
   if (rf12_recvDone()) {
     byte n = rf12_len;
@@ -694,5 +710,23 @@ void loop () {
     activityLed(0);
   }
   activityLed(0);
+#if RF69_COMPAT      
+  } else {
+      rf12_recvDone();
+      byte y = (RF69::rssi>>1);
+      for (byte i = 0; i < (100-y); ++i) {
+          printOneChar('-');
+      }
+      Serial.print("*");
+      for (byte i = 0; i < (y); ++i) {
+          printOneChar(' ');
+      }
+      Serial.print(-y);
+      Serial.println("dB");
+      
+      delay(trace_mode*10);
+      
+  }   
+#endif
 }
 

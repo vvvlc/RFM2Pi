@@ -4,6 +4,10 @@
 //http://OpenEnergyMonitor.org
 //https://github.com/openenergymonitor/RFM2Pi
 
+// V1.3 July 15 - add RF trace mode debug and fix node ID isse, merge pb66 pull requests 
+  // https://github.com/openenergymonitor/RFM2Pi/pull/2
+  // https://github.com/openenergymonitor/RFM2Pi/pull/4
+
 // Version V1.0 - Nov 2014
 // * 433Mhz default frequency, 15 default node ID
 
@@ -31,7 +35,7 @@
 
 #define MAJOR_VERSION RF12_EEPROM_VERSION // bump when EEPROM layout changes
 #define MINOR_VERSION 2                   // bump on other non-trivial changes
-#define VERSION "[RF12demo.12]"           // keep in sync with the above
+#define VERSION "[RF12demo.13]"           // keep in sync with the above
 
 #if defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny44__)
 #define TINY        1

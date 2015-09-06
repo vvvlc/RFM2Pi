@@ -12,7 +12,10 @@ void onPulse() {
     
   }
   
-  send_as_rf12_demo_packet();
+  if ((millis()-lastsentpulse)>5000) {
+      lastsentpulse = millis();
+      send_as_rf12_demo_packet();
+  }
   
   // digitalWrite(LED, HIGH); 
   // delay(2); 

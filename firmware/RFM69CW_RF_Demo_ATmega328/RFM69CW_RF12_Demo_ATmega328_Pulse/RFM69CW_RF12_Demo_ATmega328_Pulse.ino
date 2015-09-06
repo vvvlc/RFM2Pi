@@ -27,6 +27,7 @@ Payload rfm2pi;
 unsigned long pulsedebouncetime = 0;
 unsigned long pulsetime = 0;
 unsigned long lastpulsetime = 0;
+unsigned long lastsentpulse = 0;
 byte pulse_nodeid = 15;
 int pulses_per_wh = 1;
 

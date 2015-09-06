@@ -26,7 +26,7 @@ void send_as_rf12_demo_packet()
   memcpy(binarray, &rfm2pi, sizeof(rfm2pi));
   
   Serial.print("OK ");
-  Serial.print(config.nodeId);
+  Serial.print(pulse_nodeid);
   for (byte i = 0; i < sizeof(binarray); i++) {
     Serial.print(' ');
     Serial.print(binarray[i]);

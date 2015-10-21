@@ -24,6 +24,7 @@ typedef struct {
     int temp[6];  	                                      
 } Payload;
 Payload rfm2pi;
+unsigned long lastdatasend = 0;
 
 unsigned long pulsedebouncetime = 0;
 unsigned long pulsetime = 0;
@@ -654,8 +655,8 @@ void setup () {
 
 void loop () {
 
-  if ((millis()-lastsentpulse)>5000) {
-      lastsentpulse = millis();
+  if ((millis()-lastdatasend)>5000) {
+      lastdatasend = millis();
       
       DS18B20_readall();
       delay(100);

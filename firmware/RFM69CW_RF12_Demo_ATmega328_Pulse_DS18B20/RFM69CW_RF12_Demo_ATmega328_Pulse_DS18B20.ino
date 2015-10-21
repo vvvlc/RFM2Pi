@@ -656,8 +656,11 @@ void loop () {
 
   if ((millis()-lastsentpulse)>5000) {
       lastsentpulse = millis();
-      send_as_rf12_demo_packet();
+      
       DS18B20_readall();
+      delay(100);
+      send_as_rf12_demo_packet();
+      delay(100);
   }
   
 #if TINY

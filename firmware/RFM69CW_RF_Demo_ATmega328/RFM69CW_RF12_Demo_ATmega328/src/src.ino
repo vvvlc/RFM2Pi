@@ -1,10 +1,10 @@
-//RFM12Pi V2 with RFM69CW Firmware 
+//RFM12Pi V2 with RFM69CW Firmware
 //Based on JCW RF12 Demo: https://github.com/jcw/jeelib/tree/master/examples/RF12/RF12demo
-//Edited for RFM12Pi and emonPi operation June 2014 by Glyn Hudson and Trystan Lea 
+//Edited for RFM12Pi and emonPi operation June 2014 by Glyn Hudson and Trystan Lea
 //http://OpenEnergyMonitor.org
 //https://github.com/openenergymonitor/RFM2Pi
 
-// V1.3 July 15 - add RF trace mode debug and fix node ID isse, merge pb66 pull requests 
+// V1.3 July 15 - add RF trace mode debug and fix node ID isse, merge pb66 pull requests
   // https://github.com/openenergymonitor/RFM2Pi/pull/2
   // https://github.com/openenergymonitor/RFM2Pi/pull/4
 
@@ -13,7 +13,7 @@
 
 // V0.9 June 2014
 // * 210 default network group
-// * activity LED to light on startup and each time packet is received 
+// * activity LED to light on startup and each time packet is received
 
 //--------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -112,9 +112,9 @@ void whackDelay (word delay) {
     "cpi %A0, 0xFF \n\t"
     "cpc %B0, %1 \n\t"
     "brne .-10 \n\t"
-: 
+:
     "+r" (delay), "+a" (tmp)
-: 
+:
     "0" (delay)
     );
 }
@@ -166,7 +166,7 @@ byte spare_flags  :
   word frequency_offset;  // used by rf12_config, offset 4
   byte pad[RF12_EEPROM_SIZE-8];
   word crc;
-} 
+}
 RF12Config;
 
 static RF12Config config;
@@ -186,7 +186,7 @@ static void showByte (byte value) {
   if (config.hex_output) {
     showNibble(value >> 4);
     showNibble(value);
-  } 
+  }
   else
     Serial.print((word) value);
 }
@@ -242,6 +242,17 @@ static void ookPulse(int on, int off) {
   delayMicroseconds(on + 150);
   rf12_onOff(0);
   delayMicroseconds(off - 200);
+}
+
+static void showString (PGM_P s) {
+  for (;;) {
+    char c = pgm_read_byte(s++);
+    if (c == 0)
+      break;
+    if (c == '\n')
+      printOneChar('\r');
+    printOneChar(c);
+  }
 }
 
 static void fs20sendBits(word data, byte bits) {
@@ -337,16 +348,7 @@ const char helpText2[] PROGMEM =
 "    12,34 w                            - wipe entire flash memory\n"
 ;
 
-static void showString (PGM_P s) {
-  for (;;) {
-    char c = pgm_read_byte(s++);
-    if (c == 0)
-      break;
-    if (c == '\n')
-      printOneChar('\r');
-    printOneChar(c);
-  }
-}
+
 
 static void showHelp () {
 #if TINY
@@ -394,7 +396,7 @@ static void handleInput (char c) {
     rf12_sendNow(stack[3], stack + 4, top - 4);
     rf12_sendWait(2);
     rf12_configSilent();
-  } 
+  }
   else if (c > ' ') {
     switch (c) {
 
@@ -414,7 +416,7 @@ static void handleInput (char c) {
       }
       break;
 
-    case 'o': 
+    case 'o':
       { // Increment frequency within band
         // Stay within your country's ISM spectrum management guidelines, i.e.
         // allowable frequencies and their use when selecting operating frequencies.
@@ -427,14 +429,14 @@ static void handleInput (char c) {
         // display the exact frequency associated with this setting
         byte freq = 0, band = config.nodeId >> 6;
         switch (band) {
-        case RF12_433MHZ: 
-          freq = 43; 
+        case RF12_433MHZ:
+          freq = 43;
           break;
-        case RF12_868MHZ: 
-          freq = 86; 
+        case RF12_868MHZ:
+          freq = 86;
           break;
-        case RF12_915MHZ: 
-          freq = 90; 
+        case RF12_915MHZ:
+          freq = 90;
           break;
         }
         uint32_t f1 = freq * 100000L + band * 25L * config.frequency_offset;
@@ -607,7 +609,7 @@ void setup () {
 
   if (rf12_configSilent()) {
     loadConfig();
-  } 
+  }
   else {
     memset(&config, 0, sizeof config);
    config.nodeId = 0x4F;                           // RFM12Pi - 433 MHz, node 15
@@ -624,7 +626,7 @@ void setup () {
   showHelp();
 #endif
 
-  delay(1000);        //rfm12pi keep LED for for 1s to show it's working at startup 
+  delay(1000);        //rfm12pi keep LED for for 1s to show it's working at startup
   activityLed(0);
 }
 
@@ -716,7 +718,7 @@ void loop () {
     activityLed(0);
   }
   activityLed(0);
-#if RF69_COMPAT      
+#if RF69_COMPAT
   } else {
       rf12_recvDone();
       byte y = (RF69::rssi>>1);
@@ -729,10 +731,9 @@ void loop () {
       }
       Serial.print(-y);
       Serial.println("dB");
-      
+
       delay(trace_mode*10);
-      
-  }   
+
+  }
 #endif
 }
-

@@ -8,7 +8,7 @@ cache:
 install:
 - pip install -U platformio
 script:
-- platformio run -d firmware -e rfm2pi_deploy
+- platformio run -d firmware/RFM69CW_RF_Demo_ATmega328/RFM69CW_RF12_Demo_ATmega328 -e rfm2pi_deploy
 
 deploy:
   provider: releases

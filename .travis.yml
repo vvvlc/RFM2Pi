@@ -17,4 +17,4 @@ deploy:
   file: firmware/RFM69CW_RF_Demo_ATmega328/RFM69CW_RF12_Demo_ATmega328/.pioenvs/rfm2pi_deploy/firmware.hex
   on:
     repo: openenergymonitor/RFM2Pi
-    branch: master
+    branch: all

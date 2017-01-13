@@ -4,6 +4,9 @@
 //http://OpenEnergyMonitor.org
 //https://github.com/openenergymonitor/RFM2Pi
 
+// V1.4 Jan 17
+// Compile with platformIO and relase with GH releases using TravisCI
+
 // V1.3 July 15 - add RF trace mode debug and fix node ID isse, merge pb66 pull requests
   // https://github.com/openenergymonitor/RFM2Pi/pull/2
   // https://github.com/openenergymonitor/RFM2Pi/pull/4
@@ -35,7 +38,7 @@
 
 #define MAJOR_VERSION RF12_EEPROM_VERSION // bump when EEPROM layout changes
 #define MINOR_VERSION 2                   // bump on other non-trivial changes
-#define VERSION "[RF12demo.13]"           // keep in sync with the above
+#define VERSION "[RF12demo.14]"           // keep in sync with the above
 
 #define SERIAL_BAUD 38400   // max baud for 8Mhz RFM12Pi http://openenergymonitor.org/emon/node/6244/
 #define DATAFLASH   0       // set to 0 for non-JeeLinks, else 4/8/16 (Mbit)

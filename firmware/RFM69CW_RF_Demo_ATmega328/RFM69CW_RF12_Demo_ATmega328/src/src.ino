@@ -1,10 +1,13 @@
-//RFM12Pi V2 with RFM69CW Firmware 
+//RFM12Pi V2 with RFM69CW Firmware
 //Based on JCW RF12 Demo: https://github.com/jcw/jeelib/tree/master/examples/RF12/RF12demo
-//Edited for RFM12Pi and emonPi operation June 2014 by Glyn Hudson and Trystan Lea 
+//Edited for RFM12Pi and emonPi operation June 2014 by Glyn Hudson and Trystan Lea
 //http://OpenEnergyMonitor.org
 //https://github.com/openenergymonitor/RFM2Pi
 
-// V1.3 July 15 - add RF trace mode debug and fix node ID isse, merge pb66 pull requests 
+// V1.4 Jan 17
+// Compile with platformIO and relase with GH releases using TravisCI
+
+// V1.3 July 15 - add RF trace mode debug and fix node ID isse, merge pb66 pull requests
   // https://github.com/openenergymonitor/RFM2Pi/pull/2
   // https://github.com/openenergymonitor/RFM2Pi/pull/4
 
@@ -13,7 +16,7 @@
 
 // V0.9 June 2014
 // * 210 default network group
-// * activity LED to light on startup and each time packet is received 
+// * activity LED to light on startup and each time packet is received
 
 //--------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -35,20 +38,12 @@
 
 #define MAJOR_VERSION RF12_EEPROM_VERSION // bump when EEPROM layout changes
 #define MINOR_VERSION 2                   // bump on other non-trivial changes
-#define VERSION "[RF12demo.13]"           // keep in sync with the above
+#define VERSION "[RF12demo.14]"           // keep in sync with the above
 
-#if defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny44__)
-#define TINY        1
-#define SERIAL_BAUD 38400   // can only be 9600 or 38400
-#define DATAFLASH   0       // do not change
-#undef  LED_PIN             // do not change
-#define rf12_configDump()   // disabled
-#else
-#define TINY        0
 #define SERIAL_BAUD 38400   // max baud for 8Mhz RFM12Pi http://openenergymonitor.org/emon/node/6244/
 #define DATAFLASH   0       // set to 0 for non-JeeLinks, else 4/8/16 (Mbit)
 #define LED_PIN     9       // activity LED, comment out to disable
-#endif
+
 
 /// Save a few bytes of flash by declaring const if used more than once.
 const char INVALID1[] PROGMEM = "\rInvalid\n";
@@ -58,32 +53,27 @@ const char INITFAIL[] PROGMEM = "config save failed\n";
   byte trace_mode = 0;
 #endif
 
-#if TINY
-// Serial support (output only) for Tiny supported by TinyDebugSerial
-// http://www.ernstc.dk/arduino/tinycom.html
-// 9600, 38400, or 115200
-// hardware\jeelabs\avr\cores\tiny\TinyDebugSerial.h Modified to
-// moveTinyDebugSerial from PB0 to PA3 to match the Jeenode Micro V3 PCB layout
-// Connect Tiny84 PA3 to USB-BUB RXD for serial output from sketch.
-// Jeenode AIO2
-//
-// With thanks for the inspiration by 2006 David A. Mellis and his AFSoftSerial
-// code. All right reserved.
-// Connect Tiny84 PA2 to USB-BUB TXD for serial input to sketch.
-// Jeenode DIO2
-// 9600 or 38400 at present.
-
-#if SERIAL_BAUD == 9600
-#define BITDELAY 54          // 9k6 @ 8MHz, 19k2 @16MHz
-#endif
-#if SERIAL_BAUD == 38400
-#define BITDELAY 11         // 38k4 @ 8MHz, 76k8 @16MHz
-#endif
-
 #define _receivePin 8
 static int _bitDelay;
 static char _receive_buffer;
 static byte _receive_buffer_index;
+
+// TODO: replace with code from the std avr libc library:
+//  http://www.nongnu.org/avr-libc/user-manual/group__util__delay__basic.html
+void whackDelay (word delay) {
+  byte tmp=0;
+
+  asm volatile("sbiw      %0, 0x01 \n\t"
+  "ldi %1, 0xFF \n\t"
+  "cpi %A0, 0xFF \n\t"
+  "cpc %B0, %1 \n\t"
+  "brne .-10 \n\t"
+  :
+  "+r" (delay), "+a" (tmp)
+  :
+  "0" (delay)
+);
+}
 
 ISR (PCINT0_vect) {
   char i, d = 0;
@@ -102,22 +92,6 @@ ISR (PCINT0_vect) {
   _receive_buffer_index = 1;  // got a byte
 }
 
-// TODO: replace with code from the std avr libc library:
-//  http://www.nongnu.org/avr-libc/user-manual/group__util__delay__basic.html
-void whackDelay (word delay) {
-  byte tmp=0;
-
-  asm volatile("sbiw      %0, 0x01 \n\t"
-    "ldi %1, 0xFF \n\t"
-    "cpi %A0, 0xFF \n\t"
-    "cpc %B0, %1 \n\t"
-    "brne .-10 \n\t"
-: 
-    "+r" (delay), "+a" (tmp)
-: 
-    "0" (delay)
-    );
-}
 
 static byte inChar () {
   byte d;
@@ -128,7 +102,6 @@ static byte inChar () {
   return d;
 }
 
-#endif
 
 static unsigned long now () {
   // FIXME 49-day overflow
@@ -166,7 +139,7 @@ byte spare_flags  :
   word frequency_offset;  // used by rf12_config, offset 4
   byte pad[RF12_EEPROM_SIZE-8];
   word crc;
-} 
+}
 RF12Config;
 
 static RF12Config config;
@@ -186,9 +159,20 @@ static void showByte (byte value) {
   if (config.hex_output) {
     showNibble(value >> 4);
     showNibble(value);
-  } 
+  }
   else
     Serial.print((word) value);
+}
+
+static void showString (PGM_P s) {
+  for (;;) {
+    char c = pgm_read_byte(s++);
+    if (c == 0)
+      break;
+    if (c == '\n')
+      printOneChar('\r');
+    printOneChar(c);
+  }
 }
 
 static word calcCrc (const void* ptr, byte len) {
@@ -243,6 +227,7 @@ static void ookPulse(int on, int off) {
   rf12_onOff(0);
   delayMicroseconds(off - 200);
 }
+
 
 static void fs20sendBits(word data, byte bits) {
   if (bits == 8) {
@@ -337,27 +322,14 @@ const char helpText2[] PROGMEM =
 "    12,34 w                            - wipe entire flash memory\n"
 ;
 
-static void showString (PGM_P s) {
-  for (;;) {
-    char c = pgm_read_byte(s++);
-    if (c == 0)
-      break;
-    if (c == '\n')
-      printOneChar('\r');
-    printOneChar(c);
-  }
-}
+
 
 static void showHelp () {
-#if TINY
-  showString(PSTR("?\n"));
-#else
   showString(helpText1);
   if (df_present())
     showString(helpText2);
   showString(PSTR("Current configuration:\n"));
   rf12_configDump();
-#endif
 }
 
 static void handleInput (char c) {
@@ -394,7 +366,7 @@ static void handleInput (char c) {
     rf12_sendNow(stack[3], stack + 4, top - 4);
     rf12_sendWait(2);
     rf12_configSilent();
-  } 
+  }
   else if (c > ' ') {
     switch (c) {
 
@@ -414,7 +386,7 @@ static void handleInput (char c) {
       }
       break;
 
-    case 'o': 
+    case 'o':
       { // Increment frequency within band
         // Stay within your country's ISM spectrum management guidelines, i.e.
         // allowable frequencies and their use when selecting operating frequencies.
@@ -422,32 +394,6 @@ static void handleInput (char c) {
           config.frequency_offset = value;
           saveConfig();
         }
-#if !TINY
-        // this code adds about 400 bytes to flash memory use
-        // display the exact frequency associated with this setting
-        byte freq = 0, band = config.nodeId >> 6;
-        switch (band) {
-        case RF12_433MHZ: 
-          freq = 43; 
-          break;
-        case RF12_868MHZ: 
-          freq = 86; 
-          break;
-        case RF12_915MHZ: 
-          freq = 90; 
-          break;
-        }
-        uint32_t f1 = freq * 100000L + band * 25L * config.frequency_offset;
-        Serial.print((word) (f1 / 10000));
-        printOneChar('.');
-        word f2 = f1 % 10000;
-        // tedious, but this avoids introducing floating point
-        printOneChar('0' + f2 / 1000);
-        printOneChar('0' + (f2 / 100) % 10);
-        printOneChar('0' + (f2 / 10) % 10);
-        printOneChar('0' + f2 % 10);
-        Serial.println(" MHz");
-#endif
         break;
       }
 
@@ -518,12 +464,7 @@ static void handleInput (char c) {
     case 'v': //display the interpreter version and configuration
       displayVersion();
       rf12_configDump();
-#if TINY
-      Serial.println();
-#endif
       break;
-
-      // the following commands all get optimised away when TINY is set
 
     case 'l': // turn activity LED on or off
       activityLed(value);
@@ -581,9 +522,6 @@ static void displayASCII (const byte* data, byte count) {
 
 static void displayVersion () {
   showString(PSTR(VERSION));
-#if TINY
-  showString(PSTR(" Tiny"));
-#endif
 }
 
 void setup () {
@@ -591,23 +529,13 @@ void setup () {
   delay(100); // shortened for now. Handy with JeeNode Micro V1 where ISP
   // interaction can be upset by RF12B startup process.
 
-#if TINY
-  PCMSK0 |= (1<<PCINT2);  // tell pin change mask to listen to PA2
-  GIMSK |= (1<<PCIE0);    // enable PCINT interrupt in general interrupt mask
-  // FIXME: _bitDelay has not yet been initialised here !?
-  whackDelay(_bitDelay*2); // if we were low this establishes the end
-  pinMode(_receivePin, INPUT);        // PA2
-  digitalWrite(_receivePin, HIGH);    // pullup!
-  _bitDelay = BITDELAY;
-#endif
-
   Serial.begin(SERIAL_BAUD);
   Serial.println();
   displayVersion();
 
   if (rf12_configSilent()) {
     loadConfig();
-  } 
+  }
   else {
     memset(&config, 0, sizeof config);
    config.nodeId = 0x4F;                           // RFM12Pi - 433 MHz, node 15
@@ -620,22 +548,15 @@ void setup () {
 
   rf12_configDump();
   df_initialize();
-#if !TINY
-  showHelp();
-#endif
 
-  delay(1000);        //rfm12pi keep LED for for 1s to show it's working at startup 
+  delay(1000);        //rfm12pi keep LED for for 1s to show it's working at startup
   activityLed(0);
 }
 
 void loop () {
-#if TINY
-  if (_receive_buffer_index)
-    handleInput(inChar());
-#else
   if (Serial.available())
     handleInput(Serial.read());
-#endif
+
 #if RF69_COMPAT
   if (trace_mode == 0) {
 #endif
@@ -716,7 +637,7 @@ void loop () {
     activityLed(0);
   }
   activityLed(0);
-#if RF69_COMPAT      
+#if RF69_COMPAT
   } else {
       rf12_recvDone();
       byte y = (RF69::rssi>>1);
@@ -729,10 +650,9 @@ void loop () {
       }
       Serial.print(-y);
       Serial.println("dB");
-      
+
       delay(trace_mode*10);
-      
-  }   
+
+  }
 #endif
 }
-

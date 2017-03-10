@@ -1,0 +1,21 @@
+language: python
+python:
+- '2.7'
+sudo: false
+cache:
+  directories:
+  - "~/.platformio"
+install:
+- pip install -U platformio
+script:
+- platformio run -d firmware/RFM69CW_RF_Demo_ATmega328/RFM69CW_RF12_Demo_ATmega328
+  -e rfm2pi_deploy
+deploy:
+  provider: releases
+  api_key:
+    secure: KkNLrVnLaDA0oQPQvQ0EDduYN7nRF1FbieCqeG9C7s/V924lYdTivSs9jA0hIJy33LyFsns/52pKSmyASZo7/yogNstflqYcDahVGoB85ckbw+38MmDKByHguSIiqPgaiT2lIpIuuInsZCluuwWQBJ1geFxfad5VeLBozt798CwMw6JmIM5+73wAXQdAQnKzGTHecjz1m4+fcvaWIVzMJdc0JgC/o56Ul7PPeub4O3nQb2n9rnLA7y4esw/0malqkQiBCiXcCgZ6Dxz3pxQnuHy7Y9EGbUnNMB5M4q4M0NhBGAxSktneNjQ+Jtnl0S4iZ0F77xVZpxsfcZL+cPX0rDCYEvOnBVb6XqQjf7aHAxHcaockpNLIZ7s7ZawLnigXuF1AhXdAdELZwWcvbotHWxf+aGlcq7bCNvuYsrzQaD1kibH24M/6Y6xrLlbwNOZBv6My01kUIysLDAmLVG1R78gilas5R83xt4qHyxYf/SibgRrwkSXqqRnQP0AeDTwv2mEgvvnkmKyFGai4MgpSoJwcqKgC1r12WIKXZizN57SJLbrmf/jCbpy9+7JD8yraB4xC6qyI4glIyYXxRJ5MjLD/gW2GhCUvwRCwYucG69zw3G7sneJsmNFY7gBFztBBiLPADhyGU81n0OrBi/n0Bdqu/hZfD0kfPaCC/iP+PkE=
+  file: firmware/RFM69CW_RF_Demo_ATmega328/RFM69CW_RF12_Demo_ATmega328/.pioenvs/rfm2pi_deploy/firmware.hex
+  on:
+    repo: openenergymonitor/RFM2Pi
+    all_branches: true
+    condition: $TRAVIS_TAG =~ ^[0-9]+\.[0-9]+\.[0-9]+$

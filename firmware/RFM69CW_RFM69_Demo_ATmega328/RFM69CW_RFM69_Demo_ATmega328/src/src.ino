@@ -1,6 +1,6 @@
 /* FUNKY */
 #ifdef  ARDUINO_AVR_LILYPAD_USB   //FUNKY
-//#define SER1
+#define SER1
 #ifdef SER1
   #define SerialX Serial1
   #define BAUD_RATE 9600

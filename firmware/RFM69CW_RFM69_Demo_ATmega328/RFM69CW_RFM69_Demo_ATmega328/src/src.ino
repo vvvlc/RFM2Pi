@@ -23,8 +23,9 @@
 #define BAUD_RATE 57600
 #endif
 
+#define NOSPIFlash
 #include <RFM69.h>
-#include <WirelessHEX69.h>
+#include <RFM69_OTA.h>
 #include <SPI.h>
 #include <util/crc16.h>
 #include <avr/eeprom.h>

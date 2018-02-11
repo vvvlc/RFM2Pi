@@ -1,0 +1,2 @@
+name=RFM2PI
+version=1.6.9
